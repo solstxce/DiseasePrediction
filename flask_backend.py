@@ -116,4 +116,4 @@ if __name__ == '__main__':
         ]
         patient_logs_collection.insert_many(sample_logs)
 
-    app.run(debug=True)
+    app.run(debug=True,host="0.0.0.0")
