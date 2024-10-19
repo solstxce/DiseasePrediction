@@ -131,6 +131,9 @@ def main():
             if st.session_state.user['role'] in ['admin', 'doctor']:
                 if st.button("Patient Logs", key="patient_logs_button"):
                     st.session_state.page = "Patient Logs"
+                st.markdown("---")
+            if st.button("Developers", key="developers_button"):
+                st.session_state.page = "Developers"
 
     # Main content
     if st.session_state.user is None:
@@ -144,6 +147,8 @@ def main():
             live_data_capture_page()
         elif st.session_state.page == "Patient Logs" and st.session_state.user['role'] in ['admin', 'doctor']:
             patient_logs_page()
+        elif st.session_state.page == "Developers":
+            developers_page()
 
 def login(email, password):
     response = requests.post(f"{API_URL}/login", json={"email": email, "password": password})
@@ -342,7 +347,7 @@ def predict_disease_page():
     if st.button("Clear Recognized Symptoms"):
         st.session_state.recognized_text = ""
         st.session_state.recognized_symptoms = []
-        st.experimental_rerun()
+        st.rerun()
 
 def patient_logs_page():
     st.header("Patient Logs")
@@ -438,6 +443,53 @@ def live_data_capture_page():
                         symptoms_placeholder.write("No symptoms detected in the speech.")
                 
                 time.sleep(0.1)
+
+# Add this new function to display the developers' information
+def developers_page():
+    st.header("Meet Our Developers")
+    
+    st.markdown("""
+    <style>
+    .dev-card {
+        background-color: #f0f2f6;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .dev-name {
+        color: #0066cc;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .dev-id {
+        color: #666666;
+        font-style: italic;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    developers = [
+        {"name": "D. Aakash", "id": "99220040051"},
+        {"name": "Geetheshwar", "id": "99220040368"},
+        {"name": "K. Suryavardhan Reddy", "id": "99220040370"},
+        {"name": "K. Sai Suhas", "id": "99220040369"}
+    ]
+
+    for dev in developers:
+        st.markdown(f"""
+        <div class="dev-card">
+            <p class="dev-name">{dev['name']}</p>
+            <p class="dev-id">ID: {dev['id']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="text-align: center; margin-top: 50px;">
+        <p style="font-style: italic; color: #666666;">
+        "Coming together is a beginning. Keeping together is progress. Working together is success." - Henry Ford
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
