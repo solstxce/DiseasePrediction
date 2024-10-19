@@ -85,6 +85,13 @@ class PatientLogs(Resource):
         else:
             return jsonify({"message": "Log not found or no changes made"}), 404
 
+class HeartRate(Resource):
+    @jwt_required()
+    def get(self):
+        duration = int(request.args.get('duration', 60))  # Default to 60 seconds
+        time_points, heart_rates = simulate_heart_rate(duration)
+        return jsonify({'time': time_points.tolist(), 'heart_rate': heart_rates.tolist()})
+
 api.add_resource(UserLogin, '/login')
 api.add_resource(PatientLogs, '/patient_logs', '/patient_logs/<string:log_id>')
 api.add_resource(HeartRate, '/heart_rate')
