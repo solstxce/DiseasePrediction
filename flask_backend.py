@@ -113,7 +113,7 @@ if __name__ == '__main__':
             {'email': 'admin@example.com', 'password': 'admin123', 'role': 'admin'},
             {'email': 'doctor@example.com', 'password': 'doctor123', 'role': 'doctor'},
             {'email': 'user@example.com', 'password': 'user123', 'role': 'user'},
-            {'email': 'admin@gmail.com.com', 'password': 'admin123', 'role': 'admin'}
+            {'email': 'sags@gmail.com', 'password': 'admin123', 'role': 'admin'}
         ]
         users_collection.insert_many(sample_users)
 
