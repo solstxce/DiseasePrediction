@@ -60,6 +60,7 @@ class PatientLogs(Resource):
         new_log = {
             'date': data['date'],
             'patient_id': data['patient_id'],
+            'patient_name': data['patient_name'],
             'predicted_disease': data['predicted_disease'],
             'confidence': data['confidence']
         }
@@ -67,21 +68,25 @@ class PatientLogs(Resource):
         new_log['_id'] = str(result.inserted_id)
         return jsonify({"message": "Log added successfully", "log": new_log}), 201
 
-class HeartRate(Resource):
     @jwt_required()
-    def post(self):
+    @admin_required
+    def put(self, log_id):
         data = request.get_json()
-        duration = data.get('duration', 10)  # Default to 10 seconds
-        time_points, heart_rates = simulate_heart_rate(duration)
-        average_heart_rate = np.mean(heart_rates)
-        return jsonify({
-            "time_points": time_points.tolist(),
-            "heart_rates": heart_rates.tolist(),
-            "average_heart_rate": float(average_heart_rate)
-        })
+        updated_log = {
+            'date': data['date'],
+            'patient_id': data['patient_id'],
+            'patient_name': data['patient_name'],
+            'predicted_disease': data['predicted_disease'],
+            'confidence': data['confidence']
+        }
+        result = patient_logs_collection.update_one({'_id': ObjectId(log_id)}, {'$set': updated_log})
+        if result.modified_count > 0:
+            return jsonify({"message": "Log updated successfully"}), 200
+        else:
+            return jsonify({"message": "Log not found or no changes made"}), 404
 
 api.add_resource(UserLogin, '/login')
-api.add_resource(PatientLogs, '/patient_logs')
+api.add_resource(PatientLogs, '/patient_logs', '/patient_logs/<string:log_id>')
 api.add_resource(HeartRate, '/heart_rate')
 
 # Heart rate simulation
@@ -106,8 +111,8 @@ if __name__ == '__main__':
 
     if patient_logs_collection.count_documents({}) == 0:
         sample_logs = [
-            {'date': '2024-10-01', 'patient_id': 'P001', 'predicted_disease': 'Common Cold', 'confidence': '85%'},
-            {'date': '2024-10-02', 'patient_id': 'P002', 'predicted_disease': 'Influenza', 'confidence': '92%'}
+            {'date': '2024-10-01 09:00:00', 'patient_id': 'P001', 'patient_name': 'John Doe', 'predicted_disease': 'Common Cold', 'confidence': '85%'},
+            {'date': '2024-10-02 14:30:00', 'patient_id': 'P002', 'patient_name': 'Jane Smith', 'predicted_disease': 'Influenza', 'confidence': '92%'}
         ]
         patient_logs_collection.insert_many(sample_logs)
 

@@ -13,6 +13,7 @@ import whisper
 import tempfile
 import os
 from pydub import AudioSegment
+from datetime import datetime
 
 # API endpoint
 API_URL = "http://localhost:5000"
@@ -189,6 +190,9 @@ def home_page():
 def predict_disease_page():
     st.header("Predict Disease")
 
+    # Add patient name input
+    patient_name = st.text_input("Patient Name")
+
     # Heart Rate Monitoring Section
     st.subheader("Heart Rate Monitor")
     duration = st.selectbox("Select monitoring duration (seconds)", [10, 20, 30, 60], index=0)
@@ -332,8 +336,9 @@ def predict_disease_page():
             # Log the prediction
             headers = {"Authorization": f"Bearer {st.session_state.token}"}
             log_data = {
-                "date": time.strftime("%Y-%m-%d"),
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "patient_id": st.session_state.user['email'],
+                "patient_name": patient_name,
                 "predicted_disease": prediction,
                 "confidence": f"{confidence:.2%}"
             }
@@ -355,6 +360,26 @@ def patient_logs_page():
     logs = get_patient_logs()
     if logs:
         df = pd.DataFrame(logs)
+        
+        # Add edit functionality for admin users
+        if st.session_state.user['role'] == 'admin':
+            st.subheader("Edit Logs")
+            selected_log = st.selectbox("Select a log to edit", df['_id'].tolist())
+            if selected_log:
+                log_to_edit = df[df['_id'] == selected_log].iloc[0]
+                edited_log = {
+                    "date": st.text_input("Date", log_to_edit['date']),
+                    "patient_id": st.text_input("Patient ID", log_to_edit['patient_id']),
+                    "patient_name": st.text_input("Patient Name", log_to_edit['patient_name']),
+                    "predicted_disease": st.text_input("Predicted Disease", log_to_edit['predicted_disease']),
+                    "confidence": st.text_input("Confidence", log_to_edit['confidence'])
+                }
+                if st.button("Update Log"):
+                    update_patient_log(selected_log, edited_log)
+                    st.success("Log updated successfully!")
+                    st.rerun()
+
+        st.subheader("All Logs")
         st.dataframe(df)
         
         csv = df.to_csv(index=False).encode('utf-8')
@@ -366,6 +391,12 @@ def patient_logs_page():
         )
     else:
         st.warning("No patient logs available or you don't have permission to view them.")
+
+# Add this new function to update patient logs
+def update_patient_log(log_id, updated_data):
+    headers = {"Authorization": f"Bearer {st.session_state.token}"}
+    response = requests.put(f"{API_URL}/patient_logs/{log_id}", json=updated_data, headers=headers)
+    return response.status_code == 200
 
 def live_data_capture_page():
     st.header("Live Data Capture")
