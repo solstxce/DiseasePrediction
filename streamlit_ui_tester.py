@@ -56,8 +56,36 @@ symptoms_list = [
 ]
 
 def main():
-    st.set_page_config(page_title="Disease Prediction System", layout="wide")
-    st.title("Disease Prediction System")
+    st.set_page_config(page_title="AI Chat History", page_icon=":speech_balloon:", layout="wide")
+
+    # Custom CSS to style the header and image
+    st.markdown("""
+    <style>
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .header-text {
+        font-size: 36px;
+        font-weight: bold;
+        margin-right: 20px;
+    }
+    .header-image {
+        width: 100px;
+        height: auto;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Header with image
+    st.markdown("""
+    <div class="header-container">
+        <div class="header-text">Disease Prediction System</div>
+        <img src="https://i.ibb.co/HNnLGdV/Whats-App-Image-2024-10-19-at-18-12-21-b286a98b.jpg" class="header-image">
+    </div>
+    """, unsafe_allow_html=True)
 
     # Initialize session state
     if 'user' not in st.session_state:
