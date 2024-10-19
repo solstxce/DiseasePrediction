@@ -75,6 +75,7 @@ def main():
     .header-image {
         width: 100px;
         height: auto;
+        border-radius: 25px;
     }
     </style>
     """, unsafe_allow_html=True)
