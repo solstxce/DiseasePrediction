@@ -7,6 +7,7 @@ import time
 from pymongo import MongoClient
 from bson import ObjectId
 import numpy as np
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 api = Api(app)
@@ -35,12 +36,32 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return wrapper
 
+class UserRegister(Resource):
+    def post(self):
+        email = request.json.get('email', None)
+        password = request.json.get('password', None)
+        
+        if not email or not password:
+            return {"message": "Email and password are required"}, 400
+        
+        if users_collection.find_one({'email': email}):
+            return {"message": "User already exists"}, 400
+        
+        hashed_password = generate_password_hash(password)
+        new_user = {
+            'email': email,
+            'password': hashed_password,
+            'role': 'user'  # Default role for new registrations
+        }
+        users_collection.insert_one(new_user)
+        return {"message": "User created successfully"}, 201
+
 class UserLogin(Resource):
     def post(self):
         email = request.json.get('email', None)
         password = request.json.get('password', None)
         user = users_collection.find_one({'email': email})
-        if not user or user['password'] != password:
+        if not user or not check_password_hash(user['password'], password):
             return {"message": "Invalid credentials"}, 401
         access_token = create_access_token(identity=email)
         return {"access_token": access_token, "role": user['role']}
@@ -92,6 +113,7 @@ class HeartRate(Resource):
         time_points, heart_rates = simulate_heart_rate(duration)
         return jsonify({'time': time_points.tolist(), 'heart_rate': heart_rates.tolist()})
 
+api.add_resource(UserRegister, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(PatientLogs, '/patient_logs', '/patient_logs/<string:log_id>')
 api.add_resource(HeartRate, '/heart_rate')
@@ -110,10 +132,10 @@ if __name__ == '__main__':
     # Initialize the database with some sample data if it's empty
     if users_collection.count_documents({}) == 0:
         sample_users = [
-            {'email': 'admin@example.com', 'password': 'admin123', 'role': 'admin'},
-            {'email': 'doctor@example.com', 'password': 'doctor123', 'role': 'doctor'},
-            {'email': 'user@example.com', 'password': 'user123', 'role': 'user'},
-            {'email': 'sags@gmail.com', 'password': 'admin123', 'role': 'admin'}
+            {'email': 'admin@example.com', 'password': generate_password_hash('admin123'), 'role': 'admin'},
+            {'email': 'doctor@example.com', 'password': generate_password_hash('doctor123'), 'role': 'doctor'},
+            {'email': 'user@example.com', 'password': generate_password_hash('user123'), 'role': 'user'},
+            {'email': 'sags@gmail.com', 'password': generate_password_hash('admin123'), 'role': 'admin'}
         ]
         users_collection.insert_many(sample_users)
 

@@ -14,6 +14,7 @@ import tempfile
 import os
 from pydub import AudioSegment
 from datetime import datetime
+import random
 
 # API endpoint
 API_URL = "http://localhost:5000"
@@ -127,10 +128,12 @@ def main():
                 reg_password_2 = st.text_input("Retype Password", type="password")
                 if st.button("Register", key="register_button"):
                     if reg_password == reg_password_2:
-                        # Implement registration logic here
-                        st.success("Registration successful! Please sign in.")
-                        st.session_state.show_register = False
-                        st.rerun()
+                        if register(reg_email, reg_password):
+                            st.success("Registration successful! Please sign in.")
+                            st.session_state.show_register = False
+                            st.rerun()
+                        else:
+                            st.error("Registration failed. Please try again.")
                     else:
                         st.error("Passwords do not match")
                 if st.button("Back to Sign In", key="back_to_signin_button"):
@@ -349,6 +352,20 @@ def predict_disease_page():
     for symptom in all_symptoms:
         st.write(f"- {symptom}")
 
+    # Simulate DHT-11 sensor data
+    temperature, humidity = simulate_dht11()
+    st.subheader("Environmental Data")
+    st.write(f"Temperature: {temperature}°F")
+    st.write(f"Humidity: {humidity}%")
+
+    # Add temperature-related symptoms
+    if temperature > 99.5:
+        all_symptoms.append("high_fever")
+        st.warning("High fever detected!")
+    elif temperature > 98.0:
+        all_symptoms.append("mild_fever")
+        st.info("Mild fever detected.")
+
     # Prediction Button
     if st.button("Predict Disease", key="predict_disease"):
         if all_symptoms:
@@ -550,6 +567,17 @@ def developers_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
+
+def register(email, password):
+    response = requests.post(f"{API_URL}/register", json={"email": email, "password": password})
+    if response.status_code == 201:
+        return True
+    return False
+
+def simulate_dht11():
+    temperature = round(random.uniform(98.0, 102.0), 1)
+    humidity = round(random.uniform(30, 70), 1)
+    return temperature, humidity
 
 if __name__ == "__main__":
     main()
