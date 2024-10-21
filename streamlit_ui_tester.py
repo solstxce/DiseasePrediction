@@ -528,37 +528,36 @@ def developers_page():
     st.markdown("""
     <style>
     .dev-card {
-        background-color: #f0f2f6;
+        background-color: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         padding: 20px;
-        margin-bottom: 20px;
+        margin: 10px 0;
     }
-    .dev-name {
-        color: #0066cc;
-        font-size: 20px;
-        font-weight: bold;
-    }
-    .dev-id {
-        color: #666666;
-        font-style: italic;
+    .dev-image {
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
     }
     </style>
     """, unsafe_allow_html=True)
-
+    col1, col2, col3,col4 = st.columns(4)
     developers = [
-        {"name": "D. Aakash", "id": "99220040051"},
-        {"name": "Geetheshwar", "id": "99220040368"},
-        {"name": "K. Suryavardhan Reddy", "id": "99220040370"},
-        {"name": "K. Sai Suhas", "id": "99220040369"}
+        {"name": "D. Aakash", "id": "99220040051","image": "https://picsum.photos/150/150?random=1"},
+        {"name": "G. Geethesh", "id": "99220040368","image": "https://picsum.photos/150/150?random=2"},
+        {"name": "K. Surya", "id": "99220040370","image": "https://picsum.photos/150/150?random=3"},
+        {"name": "K. Suhas", "id": "99220040369","image": "https://picsum.photos/150/150?random=4"}
     ]
 
-    for dev in developers:
-        st.markdown(f"""
-        <div class="dev-card">
-            <p class="dev-name">{dev['name']}</p>
-            <p class="dev-id">ID: {dev['id']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    for col, dev in zip([col1, col2, col3,col4], developers):
+        with col:
+            st.markdown(f"""
+            <div class="dev-card">
+                <img src="{dev['image']}" class="dev-image">
+                <h3>{dev['name']}</h3>
+                <p>Reg No: {dev['id']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="text-align: center; margin-top: 50px;">
